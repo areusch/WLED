@@ -115,7 +115,7 @@ char* URL_response(AsyncWebServerRequest *request)
   for (int i = 0; i < 3; i++)
   {
    sprintf(s,"%02X", col[i]);
-   oappend(s); 
+   oappend(s);
   }
   oappend("&C2=h");
   for (int i = 0; i < 3; i++)
@@ -138,7 +138,7 @@ char* URL_response(AsyncWebServerRequest *request)
   oappend((const char*)F("<html><body><a href=\""));
   oappend(s2buf);
   oappend((const char*)F("\" target=\"_blank\">"));
-  oappend(s2buf);  
+  oappend(s2buf);
   oappend((const char*)F("</a></body></html>"));
 
   if (request != nullptr) request->send(200, "text/html", obuf);
@@ -302,6 +302,16 @@ void getSettingsJS(byte subPage, char* dest)
     sappend('i',"PB",strip.paletteBlend);
     sappend('c',"RV",strip.reverseMode);
     sappend('c',"SL",skipFirstLed);
+
+    sappend('c',"DSE",doorSensorEnabled);
+    char rgb[9];
+    snprintf(rgb, sizeof(rgb), "%02x%02x%02x%02x", doorOpenCol[0], doorOpenCol[1], doorOpenCol[2], doorOpenCol[3]);
+    sappends('s', "DOC", rgb);
+    sappend('v',"DOB",doorOpenBri);
+    snprintf(rgb, sizeof(rgb), "%02x%02x%02x%02x", doorClosedCol[0], doorClosedCol[1], doorClosedCol[2], doorClosedCol[3]);
+    sappends('s', "DCC", rgb);
+    sappend('v',"DCB",doorClosedBri);
+    sappend('v',"DT",doorClosedThres);
   }
 
   if (subPage == 3)
@@ -377,7 +387,7 @@ void getSettingsJS(byte subPage, char* dest)
       case HUE_ERROR_TIMEOUT      : strcpy(hueErrorString,(char*)F("Timeout"));                 break;
       default: sprintf(hueErrorString,"Bridge Error %i",hueError);
     }
-    
+
     sappends('m',"(\"hms\")[0]",hueErrorString);
     #endif
   }
@@ -448,14 +458,14 @@ void getSettingsJS(byte subPage, char* dest)
     oappendi(VERSION);
     oappend(") OK\";");
   }
-  
+
   #ifdef WLED_ENABLE_DMX // include only if DMX is enabled
   if (subPage == 7)
   {
     sappend('v',"CN",DMXChannels);
     sappend('v',"CG",DMXGap);
     sappend('v',"CS",DMXStart);
-    
+
     sappend('i',"CH1",DMXFixtureMap[0]);
     sappend('i',"CH2",DMXFixtureMap[1]);
     sappend('i',"CH3",DMXFixtureMap[2]);

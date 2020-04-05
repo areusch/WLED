@@ -76,13 +76,14 @@ Do not enable if WiFi is working correctly, increases power consumption.</i>
 
 //LED settings
 const char PAGE_settings_leds[] PROGMEM = R"=====(<!DOCTYPE html>
-<html><head>
+<html>
+<head>
 <meta charset=utf-8>
 <meta name=viewport content="width=500">
 <title>LED Settings</title>
-<script>var d=document,laprev=55;function H(){window.open("https://github.com/Aircoookie/WLED/wiki/Settings#led-settings")}function B(){window.open("/settings","_self")}function S(){GetV();setABL()}
-function enABL(){var a=d.getElementById("able").checked;d.Sf.LA.value=(a)?laprev:0;d.getElementById("abl").style.display=(a)?"inline":"none";d.getElementById("psu2").style.display=(a)?"inline":"none";if(d.Sf.LA.value>0){setABL()}}function enLA(){var a=d.Sf.LAsel.value;d.Sf.LA.value=a;d.getElementById("LAdis").style.display=(a==50)?"inline":"none";UI()}function setABL(){d.getElementById("able").checked=true;d.Sf.LAsel.value=50;switch(parseInt(d.Sf.LA.value)){case 0:d.getElementById("able").checked=false;enABL();break;case 30:d.Sf.LAsel.value=30;break;case 35:d.Sf.LAsel.value=35;break;case 55:d.Sf.LAsel.value=55;break;case 255:d.Sf.LAsel.value=255;break;default:d.getElementById("LAdis").style.display="inline"}UI()}function UI(){var b=d.querySelectorAll(".wc"),a=b.length;for(i=0;i<a;i++){b[i].style.display=(d.getElementById("rgbw").checked)?"inline":"none"}d.getElementById("ledwarning").style.display=(d.Sf.LC.value>1000)?"inline":"none";d.getElementById("ampwarning").style.display=(d.Sf.MA.value>7200)?"inline":"none";if(d.Sf.LA.value==255){laprev=12} else if(d.Sf.LA.value>0){laprev=d.Sf.LA.value}var j=Math.ceil((100+d.Sf.LC.value*laprev)/500)/2;j=(j>5)?Math.ceil(j):j;var g="";var e=(d.Sf.LAsel.value==30);var i=(d.Sf.LAsel.value==255);if(j<1.02&&!e&&!i){g="ESP 5V pin with 1A USB supply"}else{g+=e?"12V ":i?"WS2815 12V ":"5V ";g+=j;g+="A supply connected to LEDs"}var h=Math.ceil((100+d.Sf.LC.value*laprev)/1500)/2;h=(h>5)?Math.ceil(h):h;var c="(for most effects, ~";c+=h;c+="A is enough)<br>";d.getElementById("psu").innerHTML=g;d.getElementById("psu2").innerHTML=i?"":c}function GetV(){var d=document;
-%CSS%%SCSS%</head><body onload=S()>
+<script>var d=document,laprev=55;function H(){window.open("https://github.com/Aircoookie/WLED/wiki/Settings#led-settings")}function B(){window.open("/settings","_self")}function S(){GetV();setABL()}function enABL(){var a=d.getElementById("able").checked;d.Sf.LA.value=(a)?laprev:0;d.getElementById("abl").style.display=(a)?"inline":"none";d.getElementById("psu2").style.display=(a)?"inline":"none";if(d.Sf.LA.value>0){setABL()}}function enLA(){var a=d.Sf.LAsel.value;d.Sf.LA.value=a;d.getElementById("LAdis").style.display=(a==50)?"inline":"none";UI()}function setABL(){d.getElementById("able").checked=true;d.Sf.LAsel.value=50;switch(parseInt(d.Sf.LA.value)){case 0:d.getElementById("able").checked=false;enABL();break;case 30:d.Sf.LAsel.value=30;break;case 35:d.Sf.LAsel.value=35;break;case 55:d.Sf.LAsel.value=55;break;case 255:d.Sf.LAsel.value=255;break;default:d.getElementById("LAdis").style.display="inline"}UI()}function UI(){var b=d.querySelectorAll(".wc"),a=b.length;for(i=0;i<a;i++){b[i].style.display=(d.getElementById("rgbw").checked)?"inline":"none"}d.getElementById("ledwarning").style.display=(d.Sf.LC.value>1000)?"inline":"none";d.getElementById("ampwarning").style.display=(d.Sf.MA.value>7200)?"inline":"none";if(d.Sf.LA.value==255){laprev=12}else{if(d.Sf.LA.value>0){laprev=d.Sf.LA.value}}var j=Math.ceil((100+d.Sf.LC.value*laprev)/500)/2;j=(j>5)?Math.ceil(j):j;var g="";var e=(d.Sf.LAsel.value==30);var f=(d.Sf.LAsel.value==255);if(j<1.02&&!e&&!f){g="ESP 5V pin with 1A USB supply"}else{g+=e?"12V ":f?"WS2815 12V ":"5V ";g+=j;g+="A supply connected to LEDs"}var h=Math.ceil((100+d.Sf.LC.value*laprev)/1500)/2;h=(h>5)?Math.ceil(h):h;var c="(for most effects, ~";c+=h;c+="A is enough)<br>";d.getElementById("psu").innerHTML=g;d.getElementById("psu2").innerHTML=f?"":c}function GetV(){var d=document;
+%CSS%%SCSS%</head>
+<body onload=S()>
 <form id=form_s name=Sf method=post>
 <div class=helpB><button type=button onclick=H()>?</button></div>
 <button type=button onclick=B()>Back</button><button type=submit>Save</button><hr>
@@ -123,15 +124,7 @@ LED voltage (Max. current for a single LED):<br>
 <br>
 LEDs are 4-channel type (RGBW): <input type=checkbox name=EW onchange=UI() id=rgbw><br>
 <span class=wc>
-Auto-calculate white channel from RGB:<br>
-<select name=AW>
-<option value=0>None</option>
-<option value=1>Brighter</option>
-<option value=2>Accurate</option>
-<option value=3>Dual</option>
-<option value=4>Legacy</option>
-</select>
-<br></span>
+Auto-calculate white channel from RGB: <input type=checkbox name=AW><br></span>
 Color order:
 <select name=CO>
 <option value=0>GRB</option>
@@ -167,9 +160,16 @@ Palette blending:
 <option value=3>None (not recommended)</option>
 </select><br>
 Reverse LED order (rotate 180): <input type=checkbox name=RV><br>
-Skip first LED: <input type=checkbox name=SL><hr>
+Skip first LED: <input type=checkbox name=SL><br>
+<h3>Door Sensor</h3>
+Enabled? <input type=checkbox name=DSE><br>
+Door Open Color: <input type=text name=DOC> Bright: <input type=text name=DOB><br>
+Door Closed Color: <input type=text name=DCC> Bright: <input type=text name=DCB><br>
+Door Threshold: <input type=text name=DT><br>
 <button type=button onclick=B()>Back</button><button type=submit>Save</button>
-</form></body></html>)=====";
+</form>
+</body>
+</html>)=====";
 
 
 #ifdef WLED_ENABLE_DMX
@@ -178,7 +178,7 @@ const char PAGE_settings_dmx[] PROGMEM = R"=====(<!DOCTYPE html>
 <html><head><meta name="viewport" content="width=500"><meta charset="utf-8"><title>DMX Settings</title><script>
 function GCH(num) {
   d=document;
-  
+
   d.getElementById('dmxchannels').innerHTML += "";
   for (i=0;i<num;i++) {
     d.getElementById('dmxchannels').innerHTML += "<span id=CH" + (i+1) + "s >Channel " + (i+1) + ": <select name=CH" + (i+1) + " id=\"CH" + (i+1) + "\"><option value=0>Set to 0</option><option value=1>Red</option><option value=2>Green</option><option value=3>Blue</option><option value=4>White</option><option value=5>Shutter (Brightness)</option><option value=6>Set to 255</option></select></span><br />\n";
@@ -197,7 +197,7 @@ function mMap(){
     if (i>=numCh) {
       d.getElementById("CH"+(i+1) + "s").style.opacity = "0.5";
       d.getElementById("CH"+(i+1)).disabled = true;
-      
+
     } else {
       d.getElementById("CH"+(i+1) + "s").style.opacity = "1";
       d.getElementById("CH"+(i+1)).disabled = false;

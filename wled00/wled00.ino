@@ -344,6 +344,14 @@ byte effectSpeed = 128;
 byte effectIntensity = 128;
 byte effectPalette = 0;
 
+// door sensor
+byte doorSensorEnabled = false;
+byte doorOpenCol[] {255, 255, 255, 255};
+byte doorOpenBri = 127;
+byte doorClosedCol[] {0, 0, 0, 0};
+byte doorClosedBri = 0;
+byte doorClosedThres = 0x30;
+
 //network
 bool udpConnected = false, udpRgbConnected = false;
 
@@ -541,6 +549,7 @@ bool oappendi(int i)
 //boot starts here
 void setup() {
   wledInit();
+  doorSensorInit();
 }
 
 
@@ -555,6 +564,7 @@ void loop() {
   handleDMX();
 #endif
   userLoop();
+  doorSensorLoop();
 
   yield();
   handleIO();
@@ -564,7 +574,7 @@ void loop() {
 
   handleOverlays();
   yield();
-#ifdef WLED_USE_ANALOG_LEDS 
+#ifdef WLED_USE_ANALOG_LEDS
   strip.setRgbwPwm();
 #endif
 

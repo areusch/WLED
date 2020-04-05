@@ -77,7 +77,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     #endif
     strip.ablMilliampsMax = request->arg("MA").toInt();
     strip.milliampsPerLed = request->arg("LA").toInt();
-    
+
     useRGBW = request->hasArg("EW");
     strip.colorOrder = request->arg("CO").toInt();
     strip.rgbwMode = request->arg("AW").toInt();
@@ -109,6 +109,28 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
     skipFirstLed = request->hasArg("SL");
     t = request->arg("BF").toInt();
     if (t > 0) briMultiplier = t;
+
+    byte oldDoorSensorEnabled = doorSensorEnabled;
+    doorSensorEnabled = request->hasArg("DSE");
+    String colorStr = request->arg("DOC");
+    if (colorStr.length() == 8) {
+      for (int i = 0; i < 4; i++) {
+        doorOpenCol[i] = strtol(colorStr.substring(i * 2, (i + 1) * 2).c_str(), NULL, 16);
+      }
+    }
+    doorOpenBri = request->arg("DOB").toInt();
+
+    colorStr = request->arg("DCC");
+    if (colorStr.length() == 8) {
+      for (int i = 0; i < 4; i++) {
+        doorClosedCol[i] = strtol(colorStr.substring(i * 2, (i + 1) * 2).c_str(), NULL, 16);
+      }
+    }
+    doorClosedBri = request->arg("DCB").toInt();
+    doorClosedThres = request->arg("DT").toInt();
+    if (oldDoorSensorEnabled != doorSensorEnabled) {
+      doorSensorInit();
+    }
   }
 
   //UI
@@ -311,7 +333,7 @@ void handleSettingsSet(AsyncWebServerRequest *request, byte subPage)
       DMXFixtureMap[i] = t;
     }
   }
-  
+
   #endif
   if (subPage != 6 || !doReboot) saveSettingsToEEPROM(); //do not save if factory reset
   if (subPage == 2) {
@@ -640,7 +662,7 @@ bool handleSet(AsyncWebServerRequest *request, const String& req)
   //mode, 1 countdown
   pos = req.indexOf("NM=");
   if (pos > 0) countdownMode = (req.charAt(pos+3) != '0');
-  
+
   pos = req.indexOf("NX="); //sets digits to code
   if (pos > 0) {
     strlcpy(cronixieDisplay, req.substring(pos + 3, pos + 9).c_str(), 6);

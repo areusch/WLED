@@ -3,10 +3,10 @@
  * EEPROM Map: https://github.com/Aircoookie/WLED/wiki/EEPROM-Map
  */
 
-#define EEPSIZE 2560  //Maximum is 4096
+#define EEPSIZE 2611  //Maximum is 4096
 
 //eeprom Version code, enables default settings instead of 0 init on update
-#define EEPVER 18
+#define EEPVER 19
 //0 -> old version, default
 //1 -> 0.4p 1711272 and up
 //2 -> 0.4p 1711302 and up
@@ -26,6 +26,7 @@
 //16-> 0.9.1
 //17-> 0.9.1-dmx
 //18-> 0.9.1-e131
+//19-> 0.9.1-e131 + door sensor
 
 void commit()
 {
@@ -272,6 +273,15 @@ void saveSettingsToEEPROM()
   } // last used: 2549. maybe leave a few bytes for future expansion and go on with 2600 kthxbye.
   #endif
 
+  for (int i = 0; i < 4; i++) {
+    EEPROM.write(2600 + i, doorOpenCol[i]);
+    EEPROM.write(2605 + i, doorClosedCol[i]);
+  }
+  EEPROM.write(2604, doorOpenBri);
+  EEPROM.write(2608, doorClosedBri);
+  EEPROM.write(2609, doorSensorEnabled);
+  EEPROM.write(2610, doorClosedThres);
+
   commit();
 }
 
@@ -364,9 +374,9 @@ void loadSettingsFromEEPROM(bool first)
   turnOnAtBoot = EEPROM.read(369);
   useRGBW = EEPROM.read(372);
   //374 - strip.paletteFade
-  
+
   apBehavior = EEPROM.read(376);
-    
+
   //377 = lastEEPROMversion
   if (lastEEPROMversion > 3) {
     aOtaEnabled = EEPROM.read(390);
@@ -374,7 +384,7 @@ void loadSettingsFromEEPROM(bool first)
     receiveNotificationEffects = EEPROM.read(392);
   }
   receiveNotifications = (receiveNotificationBrightness || receiveNotificationColor || receiveNotificationEffects);
-  
+
   if (lastEEPROMversion > 4) {
     huePollingEnabled = EEPROM.read(2048);
     //hueUpdatingEnabled = EEPROM.read(2049);
@@ -551,11 +561,20 @@ void loadSettingsFromEEPROM(bool first)
   DMXChannels = EEPROM.read(2530);
   DMXGap = EEPROM.read(2531) + ((EEPROM.read(2532) << 8) & 0xFF00);
   DMXStart = EEPROM.read(2533) + ((EEPROM.read(2534) << 8) & 0xFF00);
-  
+
   for (int i=0;i<15;i++) {
     DMXFixtureMap[i] = EEPROM.read(2535+i);
   } //last used: 2549. maybe leave a few bytes for future expansion and go on with 2600 kthxbye.
   #endif
+
+  for (int i = 0; i < 4; i++) {
+    doorOpenCol[i] = EEPROM.read(2600 + i);
+    doorClosedCol[i] = EEPROM.read(2605 + i);
+  }
+  doorOpenBri = EEPROM.read(2604);
+  doorClosedBri = EEPROM.read(2608);
+  doorSensorEnabled = EEPROM.read(2609);
+  doorClosedThres = EEPROM.read(2610);
 
   //user MOD memory
   //2944 - 3071 reserved
@@ -604,7 +623,7 @@ bool applyPreset(byte index, bool loadBri = true)
     if (EEPROM.read(i) != 1) return false;
     strip.applyToAllSelected = true;
     if (loadBri) bri = EEPROM.read(i+1);
-    
+
     for (byte j=0; j<4; j++)
     {
       col[j] = EEPROM.read(i+j+2);
@@ -634,7 +653,7 @@ void savePreset(byte index, bool persist = true)
   if (index > 16) return;
   if (index < 1) {saveSettingsToEEPROM();return;}
   uint16_t i = 380 + index*20;//min400
-  
+
   if (index < 16) {
     EEPROM.write(i, 1);
     EEPROM.write(i+1, bri);
@@ -651,7 +670,7 @@ void savePreset(byte index, bool persist = true)
     EEPROM.write(i+13, (colTer >>  8) & 0xFF);
     EEPROM.write(i+14, (colTer >>  0) & 0xFF);
     EEPROM.write(i+15, (colTer >> 24) & 0xFF);
-  
+
     EEPROM.write(i+16, effectIntensity);
     EEPROM.write(i+17, effectPalette);
   } else { //segment 16 can save segments
@@ -660,7 +679,7 @@ void savePreset(byte index, bool persist = true)
     WS2812FX::Segment* seg = strip.getSegments();
     memcpy(EEPROM.getDataPtr() +i+2, seg, 240);
   }
-  
+
   if (persist) commit();
   savedToPresets();
   currentPreset = index;
